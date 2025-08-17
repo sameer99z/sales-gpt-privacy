@@ -1,0 +1,72 @@
+openapi: 3.1.0
+info:
+  title: Sales & Persuasion Scheduling API
+  description: |
+    Provides an endpoint to help your custom GPT find available time slots in your Google Calendar.
+    The endpoint accepts a search window and desired meeting duration, then returns the next free
+    interval that fits within that window.  This can be used to schedule sales calls or follow‑ups
+    without conflicting with existing appointments.
+  version: '1.0.0'
+servers:
+  - url: https://your-domain.example.com
+    description: Replace with the domain where you will host this API.
+paths:
+  /find-next-available-slot:
+    post:
+      operationId: findNextAvailableSlot
+      summary: Find the next available time slot in the user’s Google Calendar.
+      description: |
+        Accepts a start and end time defining the search window along with the desired meeting
+        duration (in minutes).  Returns the next available time slot inside the window that
+        accommodates the meeting.  Times must be ISO‑8601 strings in UTC.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date_start:
+                  type: string
+                  format: date-time
+                  description: Start of the search window in ISO 8601 format (UTC).
+                date_end:
+                  type: string
+                  format: date-time
+                  description: End of the search window in ISO 8601 format (UTC).
+                duration_minutes:
+                  type: integer
+                  description: Desired meeting length in minutes.
+              required:
+                - date_start
+                - date_end
+                - duration_minutes
+      responses:
+        '200':
+          description: A free slot was found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  start_time:
+                    type: string
+                    format: date-time
+                    description: Start of the available slot in ISO 8601 format.
+                  end_time:
+                    type: string
+                    format: date-time
+                    description: End of the available slot in ISO 8601 format.
+                required:
+                  - start_time
+                  - end_time
+        '404':
+          description: No available slot could be found within the given window.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Explanation of why no slot was found.
